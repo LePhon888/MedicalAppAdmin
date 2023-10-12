@@ -1,5 +1,21 @@
 .App {
   text-align: center;
+  font-size: 16px;
+}
+
+
+@media (max-width: 768px) {
+  .App {
+    font-size: 14px;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .App {
+    font-size: 12px;
+  }
+
 }
 
 .App-logo {
@@ -20,7 +36,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
   color: white;
 }
 
@@ -32,6 +47,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
