@@ -28,7 +28,7 @@ ChartJS.register(
 
 const ChartPatient = ({ data, title, month, quarter }) => {
 
-    console.log(data)
+    console.log(945791, data)
 
     const formatDate = (num) => {
         if (month > 0)
@@ -41,49 +41,44 @@ const ChartPatient = ({ data, title, month, quarter }) => {
 
     const getLabels = () => {
         if (month > 0)
-            return Array.from({ length: 12 }, (_, i) => {
-                if (data.some(item => item[0] === i + 1)) {
-                    // An item with the specified value exists in data
-                    const item = data.find(item => item[0] === i + 1);
-                    return [formatDate(item[0]), item[1]];
-                } else {
-                    return formatDate(i + 1);
-                }
-            });
+            return Array.from({ length: 12 }, (_, i) => formatDate(i + 1));
         if (quarter > 0)
-            return Array.from({ length: 4 }, (_, i) => {
-                if (data.some(item => item[0] === i + 1)) {
-                    // An item with the specified value exists in data
-                    const item = data.find(item => item[0] === i + 1);
-                    return [formatDate(item[0]), item[1]];
-                } else {
-                    return formatDate(i + 1);
-                }
-            });
-        else
-            return data.map(([day, hour]) => [formatDate(day), hour]);
+            return Array.from({ length: 4 }, (_, i) => formatDate(i + 1));
+        return data
+            .filter(value => value.length === 2)
+            .map(value => formatDate(value[0]));
     };
-
 
     const labels = getLabels();
 
-    console.log(labels)
+    console.log(labels);
 
-    const dataMap = new Map(data.map(([day, hour, value]) => [`${formatDate(day)}`, value]));
+    const totalPatientsData = data.filter(value => value.length === 2);
+    const detailedData = data.filter(value => value.length > 2);
 
-    const monthlyTotalPatients = labels.map((label) => {
-        const value = dataMap.has(label[0]) ? dataMap.get(label[0]) : 0;
-        return value;
-    });
-
-    console.log(888, monthlyTotalPatients)
+    console.log(detailedData)
 
     const chartData = {
         labels: labels,
         datasets: [
             {
+                label: 'Giờ cao điểm bệnh nhân',
+                data: labels.map(label => {
+                    const dataItem = detailedData.find(v => formatDate(v[0]) == label);
+                    return dataItem ? dataItem[2] : 0;
+                }),
+                fill: true,
+                backgroundColor: "rgba(255, 99, 132, 0.2)",
+                borderColor: "rgba(255, 99, 132, 1)",
+                pointBackgroundColor: "rgba(255, 99, 132, 1)",
+                pointRadius: 6,
+            },
+            {
                 label: title,
-                data: monthlyTotalPatients,
+                data: labels.map(label => {
+                    const dataItem = totalPatientsData.find(v => formatDate(v[0]) == label);
+                    return dataItem ? dataItem[1] : 0;
+                }),
                 fill: true,
                 backgroundColor: "rgba(75, 192, 192, 0.2)",
                 borderColor: "rgba(75, 192, 192, 1)",
@@ -92,22 +87,43 @@ const ChartPatient = ({ data, title, month, quarter }) => {
             },
         ],
     };
+
+
+    const customTooltip = {
+        callbacks: {
+            title: function (context) {
+                if (context[0].datasetIndex === 0) {
+                    const match = detailedData.find(value => formatDate(value[0]) === context[0].label);
+                    if (match && match[1]) {
+                        return `${formatDate(match[0])}, ${match[1]}`;
+                    }
+                }
+                return context[0].label;
+            },
+        },
+    };
+
+
+
+
+
+
     const options = {
         responsive: true,
         scales: {
             y: {
                 min: 0,
                 beginAtZero: true,
-
             },
         },
         plugins: {
             legend: {
                 position: 'top',
             },
-
+            tooltip: customTooltip, // Add the custom tooltip
         },
     };
+
 
 
     const noResult = () => {
